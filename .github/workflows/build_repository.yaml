@@ -13,9 +13,9 @@ jobs:
   build_repository:
     runs-on: ubuntu-latest
     steps:
-    - name: Get current time and date
-      id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d %H:%M')"
+    - name: Get current time
+      uses: ccccmagicboy/get_datetime@master
+      id: datetime
 
     - name: Build Packages
       uses: kopp/build-aur-packages@v1
@@ -31,19 +31,21 @@ jobs:
         
     - name: List generated Files
       run: ls -1 > ${{ github.workspace }}/files.txt
-    - name: Remove the current data from the release
+      
+    - name: Remove current release
       uses: kopp/action-delete-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: aurci2
+        tag_name: aurbuilder
+        
     - name: Upload Files to Release
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: aurci2
-        name: Build ${{ github.run_number }} at ${{ steps.date.outputs.date }}
+        tag_name: aurbuilder
+        name: Build ${{ github.run_number }} at ${{ steps.datetime.outputs.datetime_str }}
         files: |
           ${{ github.workspace }}/*
         draft: false
